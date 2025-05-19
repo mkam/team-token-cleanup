@@ -24,9 +24,11 @@ func main() {
 	team := flag.String("team", "", "The team name to delete tokens for. If not provided, tokens from all teams will be considered for deletion.")
 	deleteExpired := flag.Bool("expired", true, "Marks expired tokens for deletion, regardless of created_at or last_used_at.")
 	lastUsedAt := flag.Int("last-used-days-ago", 30, "Duration of time in days for how long ago a resource should have been "+
-		"last used before deleting.")
-	createdAt := flag.Int("created-at-days-ago", 0, "Duration of time in days for how long ago a resource should have been "+
-		"created before deleting.")
+		"last used before deleting. Used in conjunction with created-at-days-ago, where the token is deleted only if it has not been "+
+		"used recently AND is old enough. Set to 0 to ignore last used time.")
+	createdAt := flag.Int("created-at-days-ago", 7, "Duration of time in days for how long ago a resource should have been "+
+		"created before deleting. Used in conjunction with last-used-days-ago, where the token is deleted only if it is old "+
+		"enough AND has not been used recently. Set to 0 to ignore created time.")
 	flag.Parse()
 
 	// Initialize TFE client
@@ -100,15 +102,12 @@ func main() {
 		}
 
 		if lastUsedAtDuration > 0 && time.Since(token.LastUsedAt) > lastUsedAtDuration {
-			fmt.Printf("Marking token for deletion because last used too long ago: '%s' in team '%s' last_used_at=%s \n", identifier, team, token.LastUsedAt.String())
-			toDelete = append(toDelete, token)
-			continue
-		}
-
-		if createdAtDuration > 0 && time.Since(token.CreatedAt) > createdAtDuration {
-			fmt.Printf("Marking token for deletion because created too long ago: '%s' in team '%s' created_at=%s \n", identifier, team, token.CreatedAt.String())
-			toDelete = append(toDelete, token)
-			continue
+			if createdAtDuration > 0 && time.Since(token.CreatedAt) > createdAtDuration {
+				fmt.Printf("Marking token for deletion because last used and created too long ago:"+
+					"'%s' in team '%s' last_used_at=%s created_at=%s\n", identifier, team, token.LastUsedAt.String(), token.CreatedAt.String())
+				toDelete = append(toDelete, token)
+				continue
+			}
 		}
 	}
 	fmt.Printf("\n%d tokens marked for deletion.\n", len(toDelete))
