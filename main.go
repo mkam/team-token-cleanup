@@ -107,6 +107,11 @@ func main() {
 					"'%s' in team '%s' last_used_at=%s created_at=%s\n", identifier, team, token.LastUsedAt.String(), token.CreatedAt.String())
 				toDelete = append(toDelete, token)
 				continue
+			} else if createdAtDuration == 0 {
+				// created_at date should not be considered, delete based only on last_used_at
+				fmt.Printf("Marking token for deletion because last used too long ago: '%s' in team '%s' last_used_at=%s\n", identifier, team, token.LastUsedAt.String())
+				toDelete = append(toDelete, token)
+				continue
 			}
 		}
 	}
