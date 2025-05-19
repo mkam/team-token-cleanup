@@ -15,6 +15,7 @@ import (
 func main() {
 	ctx := context.Background()
 
+	// Parse command line flags
 	delete := flag.Bool("delete", false, "Deletes the team tokens that fit the provided criteria for deletion. Defaults to false.")
 	team := flag.String("team", "", "The team name to delete tokens for. If not provided, tokens from all teams will be considered for deletion.")
 	deleteExpired := flag.Bool("expired", true, "Marks expired tokens for deletion, regardless of created_at or last_used_at.")
@@ -24,6 +25,7 @@ func main() {
 		"created before deleting.")
 	flag.Parse()
 
+	// Initialize TFE client
 	config := &tfe.Config{
 		RetryServerErrors: true,
 	}
@@ -40,6 +42,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	// List team tokens
 	opts := &tfe.TeamTokenListOptions{
 		ListOptions: tfe.ListOptions{
 			PageSize: 100,
@@ -48,12 +51,23 @@ func main() {
 	if *team != "" {
 		opts.Query = *team
 	}
-	tokens, err := client.TeamTokens.List(ctx, orgName, opts)
-	if err != nil {
-		fmt.Printf("error listing team tokens for organization %s: %v\n", orgName, err)
-		os.Exit(1)
+	var tokens []*tfe.TeamToken
+	for {
+		resp, err := client.TeamTokens.List(ctx, orgName, opts)
+		if err != nil {
+			fmt.Printf("error listing team tokens for organization %s: %v\n", orgName, err)
+			os.Exit(1)
+		}
+		tokens = append(tokens, resp.Items...)
+
+		if resp.CurrentPage >= resp.TotalPages {
+			break
+		}
+
+		opts.PageNumber = resp.NextPage
 	}
 
+	// Determine which tokens to delete
 	var createdAtDuration time.Duration
 	if *createdAt > 0 {
 		createdAtDuration = time.Duration(*createdAt*24) * time.Hour
@@ -66,7 +80,7 @@ func main() {
 
 	now := time.Now()
 	toDelete := make([]*tfe.TeamToken, 0)
-	for _, token := range tokens.Items {
+	for _, token := range tokens {
 
 		if *deleteExpired && !token.ExpiredAt.IsZero() && token.ExpiredAt.Before(now) {
 			fmt.Printf("Marking token for deletion because expired: %s %s expired_at=%s \n", token.ID, token.Team.ID, token.ExpiredAt.String())
@@ -87,17 +101,18 @@ func main() {
 		}
 
 	}
-
 	fmt.Printf("\n%d tokens marked for deletion.\n", len(toDelete))
+
+	// Exit if delete flag is not set or no tokens to delete
 	if !*delete {
 		fmt.Println("Use the --delete flag to delete the tokens that fit the specified criteria.")
 		os.Exit(0)
 	}
-
 	if len(toDelete) == 0 {
 		os.Exit(0)
 	}
 
+	// Confirm deletion
 	r := bufio.NewReader(os.Stdin)
 	fmt.Println("Are you sure you want to delete these team tokens? (y/n): ")
 	resp, err := r.ReadString('\n')
@@ -111,11 +126,13 @@ func main() {
 		os.Exit(0)
 	}
 
+	// Delete tokens
 	for _, token := range toDelete {
 		fmt.Println("Deleting token: ", token.ID)
 		err := client.TeamTokens.DeleteByID(ctx, token.ID)
 		if err != nil {
 			fmt.Printf("Error deleting token %s: %v\n", token.ID, err)
+			// Continue trying to delete other tokens in case intermittent issue
 			continue
 		}
 	}
