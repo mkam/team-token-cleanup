@@ -12,6 +12,10 @@ import (
 	"github.com/hashicorp/go-tfe"
 )
 
+var (
+	teamNames = map[string]string{}
+)
+
 func main() {
 	ctx := context.Background()
 
@@ -81,25 +85,31 @@ func main() {
 	now := time.Now()
 	toDelete := make([]*tfe.TeamToken, 0)
 	for _, token := range tokens {
+		team := getTeamName(ctx, client, token.Team.ID)
+		var identifier string
+		if token.Description != nil && *token.Description != "" {
+			identifier = *token.Description
+		} else {
+			identifier = token.ID
+		}
 
 		if *deleteExpired && !token.ExpiredAt.IsZero() && token.ExpiredAt.Before(now) {
-			fmt.Printf("Marking token for deletion because expired: %s %s expired_at=%s \n", token.ID, token.Team.ID, token.ExpiredAt.String())
+			fmt.Printf("Marking token for deletion because expired: '%s' in team '%s' expired_at=%s \n", identifier, team, token.ExpiredAt.String())
 			toDelete = append(toDelete, token)
 			continue
 		}
 
 		if lastUsedAtDuration > 0 && time.Since(token.LastUsedAt) > lastUsedAtDuration {
-			fmt.Printf("Marking token for deletion because last used too long ago: %s %s last_used_at=%s \n", token.ID, token.Team.ID, token.LastUsedAt.String())
+			fmt.Printf("Marking token for deletion because last used too long ago: '%s' in team '%s' last_used_at=%s \n", identifier, team, token.LastUsedAt.String())
 			toDelete = append(toDelete, token)
 			continue
 		}
 
 		if createdAtDuration > 0 && time.Since(token.CreatedAt) > createdAtDuration {
-			fmt.Printf("Marking token for deletion because created too long ago: %s %s created_at=%s \n", token.ID, token.Team.ID, token.CreatedAt.String())
+			fmt.Printf("Marking token for deletion because created too long ago: '%s' in team '%s' created_at=%s \n", identifier, team, token.CreatedAt.String())
 			toDelete = append(toDelete, token)
 			continue
 		}
-
 	}
 	fmt.Printf("\n%d tokens marked for deletion.\n", len(toDelete))
 
@@ -128,7 +138,12 @@ func main() {
 
 	// Delete tokens
 	for _, token := range toDelete {
-		fmt.Println("Deleting token: ", token.ID)
+		if token.Description != nil && *token.Description != "" {
+			fmt.Printf("Deleting token: %s (%s)\n", token.ID, *token.Description)
+		} else {
+			fmt.Printf("Deleting token: %s\n", token.ID)
+		}
+
 		err := client.TeamTokens.DeleteByID(ctx, token.ID)
 		if err != nil {
 			fmt.Printf("Error deleting token %s: %v\n", token.ID, err)
@@ -137,4 +152,21 @@ func main() {
 		}
 	}
 	fmt.Println("Team tokens deleted.")
+}
+
+func getTeamName(ctx context.Context, client *tfe.Client, teamID string) string {
+	if name, ok := teamNames[teamID]; ok {
+		return name
+	}
+
+	team, err := client.Teams.Read(ctx, teamID)
+	if err != nil {
+		// The team name is just for improved logging. If we have issues readin
+		// the team, just use the team ID.
+		teamNames[teamID] = teamID
+		return teamID
+	}
+	teamNames[teamID] = team.Name
+
+	return team.Name
 }
