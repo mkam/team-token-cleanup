@@ -64,12 +64,12 @@ Example Output:
 ```
 ./team-token-cleanup
 Marking token for deletion because expired: 'old token' in team 'old-team' expired_at=2025-05-01 15:22:05.571 +0000 UTC
-Marking token for deletion because last used and created too long ago: 'CI token' in team 'ci-team' last_used_at=0001-01-01 00:00:00 +0000 UTC
-Marking token for deletion because last used and created too long ago: 'at-Ry2qKmUvTa3DnBoL' in team 'ci-team' last_used_at=0001-01-01 00:00:00 +0000 UTC
-Marking token for deletion because last used and created too long ago: 'at-Xn7pGcQoZrB8LsMd' in team 'test-team' last_used_at=0001-01-01 00:00:00 +0000 UTC
+Marking token for deletion because last used and created too long ago: 'CI token' in team 'ci-team' last_used_at=2024-02-23 20:45:33.14 +0000 UTC created_at=2024-01-23 20:31:14.918 +0000 UTC
+Marking token for deletion because never been used and created too long ago: 'at-Ry2qKmUvTa3DnBoL' in team 'ci-team' last_used_at=0001-01-01 00:00:00 +0000 UTC created_at=2024-01-23 20:31:14.918 +0000 UTC
+Marking token for deletion because last used and created too long ago: 'at-Xn7pGcQoZrB8LsMd' in team 'test-team' last_used_at=2025-01-01 21:13:44.01 +0000 UTC created_at=2024-01-23 20:31:14.918 +0000 UTC
 Marking token for deletion because because expired: 'test token' in team 'test-team' expired_at=2025-03-14 13:01:09.460 +0000 UTC
-Marking token for deletion because last used and created too long ago: 'prod token' in team 'prod-team' last_used_at=0001-01-01 00:00:00 +0000 UTC
-Marking token for deletion because last used and created too long ago: 'test token 2' in team 'test-team' last_used_at=0001-01-01 00:00:00 +0000 UTC
+Marking token for deletion because last used and created too long ago: 'prod token' in team 'prod-team' last_used_at=0001-01-01 00:00:00 +0000 UTC created_at=2024-01-23 20:31:14.918 +0000 UTC
+Marking token for deletion because last used and created too long ago: 'test token 2' in team 'test-team' last_used_at=0001-01-01 00:00:00 +0000 UTC created_at=2024-01-23 20:31:14.918 +0000 UTC
 
 7 tokens marked for deletion.
 Use the --delete flag to delete the tokens that fit the specified criteria.
@@ -78,12 +78,12 @@ Use the --delete flag to delete the tokens that fit the specified criteria.
 ```
 $ ./team-token-cleanup --delete
 Marking token for deletion because expired: 'old token' in team 'old-team' expired_at=2025-05-01 15:22:05.571 +0000 UTC
-Marking token for deletion because last used and created too long ago: 'CI token' in team 'ci-team' last_used_at=0001-01-01 00:00:00 +0000 UTC
-Marking token for deletion because last used and created too long ago: 'at-Ry2qKmUvTa3DnBoL' in team 'ci-team' last_used_at=0001-01-01 00:00:00 +0000 UTC
-Marking token for deletion because last used and created too long ago: 'at-Xn7pGcQoZrB8LsMd' in team 'test-team' last_used_at=0001-01-01 00:00:00 +0000 UTC
+Marking token for deletion because last used and created too long ago: 'CI token' in team 'ci-team' last_used_at=2024-02-23 20:45:33.14 +0000 UTC created_at=2024-01-23 20:31:14.918 +0000 UTC
+Marking token for deletion because never been used and created too long ago: 'at-Ry2qKmUvTa3DnBoL' in team 'ci-team' last_used_at=0001-01-01 00:00:00 +0000 UTC created_at=2024-01-23 20:31:14.918 +0000 UTC
+Marking token for deletion because last used and created too long ago: 'at-Xn7pGcQoZrB8LsMd' in team 'test-team' last_used_at=2025-01-01 21:13:44.01 +0000 UTC created_at=2024-01-23 20:31:14.918 +0000 UTC
 Marking token for deletion because because expired: 'test token' in team 'test-team' expired_at=2025-03-14 13:01:09.460 +0000 UTC
-Marking token for deletion because last used and created too long ago: 'prod token' in team 'prod-team' last_used_at=0001-01-01 00:00:00 +0000 UTC
-Marking token for deletion because last used and created too long ago: 'test token 2' in team 'test-team' last_used_at=0001-01-01 00:00:00 +0000 UTC
+Marking token for deletion because last used and created too long ago: 'prod token' in team 'prod-team' last_used_at=0001-01-01 00:00:00 +0000 UTC created_at=2024-01-23 20:31:14.918 +0000 UTC
+Marking token for deletion because last used and created too long ago: 'test token 2' in team 'test-team' last_used_at=0001-01-01 00:00:00 +0000 UTC created_at=2024-01-23 20:31:14.918 +0000 UTC
 
 7 tokens marked for deletion.
 Are you sure you want to delete these team tokens? (y/n):
