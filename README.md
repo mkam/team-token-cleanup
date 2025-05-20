@@ -7,7 +7,7 @@ By default, the criteria used to delete the team tokens is:
 
 OR
 
-- The token has not been used in more than 30 days AND the token is older than 7 days.
+- The token has never been used or has not been used in more than 30 days AND the token is older than 7 days.
 
 These criteria can be modified via command line flags. Additionally, the tokens can be filtered to
 a specific team using the team name with `--team`. The script requires two confirmations for deletion,
