@@ -103,8 +103,13 @@ func main() {
 
 		if lastUsedAtDuration > 0 && time.Since(token.LastUsedAt) > lastUsedAtDuration {
 			if createdAtDuration > 0 && time.Since(token.CreatedAt) > createdAtDuration {
-				fmt.Printf("Marking token for deletion because last used and created too long ago:"+
-					"'%s' in team '%s' last_used_at=%s created_at=%s\n", identifier, team, token.LastUsedAt.String(), token.CreatedAt.String())
+				if token.LastUsedAt.IsZero() {
+					fmt.Printf("Marking token for deletion because never been used and created too long ago:"+
+						"'%s' in team '%s' last_used_at=%s created_at=%s\n", identifier, team, token.LastUsedAt.String(), token.CreatedAt.String())
+				} else {
+					fmt.Printf("Marking token for deletion because last used and created too long ago:"+
+						"'%s' in team '%s' last_used_at=%s created_at=%s\n", identifier, team, token.LastUsedAt.String(), token.CreatedAt.String())
+				}
 				toDelete = append(toDelete, token)
 				continue
 			} else if createdAtDuration == 0 {
