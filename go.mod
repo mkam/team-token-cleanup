@@ -2,7 +2,7 @@ module github.com/mkam/team-token-cleanup
 
 go 1.22.2
 
-require github.com/hashicorp/go-tfe v1.80.1-0.20250516184651-8d9f805c67ac
+require github.com/hashicorp/go-tfe v1.81.1-0.20250609220414-1bb5ca59946e
 
 require (
 	github.com/google/go-querystring v1.1.0 // indirect
